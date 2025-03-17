@@ -1,3 +1,4 @@
+
 spring:
   application:
     name: "notification-svc"
@@ -10,3 +11,16 @@ spring:
     database-platform: org.hibernate.dialect.MySQL8Dialect
     hibernate:
       ddl-auto: update
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: dripify.contact@gmail.com
+    password: khff dvlu pkow nwmz
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+server:
+  port: 8081

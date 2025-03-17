@@ -1,5 +1,6 @@
 package app.notificationsvc.model;
 
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,28 +13,26 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class NotificationPreference {
+public class Notification {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private UUID userId;
 
     @Column(nullable = false)
-    private boolean isNewsletterEnabled;
+    private String subject;
+
+    @Column(nullable = false)
+    private String body;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private NotificationType type;
-
-    @Column(nullable = false)
-    private String contactData;
+    private NotificationStatus status;
 
     @Column(nullable = false)
     private LocalDateTime createdOn;
 
-    @Column(nullable = false)
-    private LocalDateTime updatedOn;
 }
