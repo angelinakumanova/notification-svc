@@ -4,6 +4,8 @@ import app.notificationsvc.model.Notification;
 import app.notificationsvc.model.NotificationPreference;
 import app.notificationsvc.model.NotificationStatus;
 import app.notificationsvc.repository.NotificationPreferenceRepository;
+import app.notificationsvc.repository.NotificationRepository;
+import app.notificationsvc.web.dto.OrderConfirmationEmailRequest;
 import app.notificationsvc.web.dto.UpsertNotificationPreference;
 import app.notificationsvc.web.dto.WelcomeEmailRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -22,11 +24,13 @@ import java.util.UUID;
 public class NotificationService {
 
     private final NotificationPreferenceRepository preferenceRepository;
+    private final NotificationRepository notificationRepository;
     private final JavaMailSender mailSender;
     private final SpringTemplateEngine templateEngine;
 
-    public NotificationService(NotificationPreferenceRepository preferenceRepository, JavaMailSender mailSender, SpringTemplateEngine templateEngine) {
+    public NotificationService(NotificationPreferenceRepository preferenceRepository, NotificationRepository notificationRepository, JavaMailSender mailSender, SpringTemplateEngine templateEngine) {
         this.preferenceRepository = preferenceRepository;
+        this.notificationRepository = notificationRepository;
         this.mailSender = mailSender;
         this.templateEngine = templateEngine;
     }
@@ -59,23 +63,34 @@ public class NotificationService {
     }
 
     public void sendWelcomeEmail(WelcomeEmailRequest welcomeEmailRequest) {
-        String subject = "Welcome To Dripify!";
-
         Context context = new Context();
         context.setVariable("firstName", welcomeEmailRequest.getUserFirstName());
 
-        String body = templateEngine.process("welcome-email", context);
+        String body = templateEngine.process(welcomeEmailRequest.getBodyTemplate(), context);
 
-        sendMail(welcomeEmailRequest.getUserId(), subject, body);
+        sendMail(welcomeEmailRequest.getUserId(), welcomeEmailRequest.getBodyTemplate(), welcomeEmailRequest.getSubject(), body);
     }
 
-    private void sendMail(UUID userId, String subject, String body) {
+    public void sendOrderConfirmationEmail(OrderConfirmationEmailRequest orderConfirmationEmailRequest) {
+        Context context = new Context();
+        context.setVariable("fullName", orderConfirmationEmailRequest.getFullName());
+        context.setVariable("address", orderConfirmationEmailRequest.getAddress());
+        context.setVariable("phoneNumber", orderConfirmationEmailRequest.getPhoneNumber());
+        context.setVariable("courier", orderConfirmationEmailRequest.getCourier());
+        context.setVariable("paymentMethod", orderConfirmationEmailRequest.getPaymentMethod());
+
+        String body = templateEngine.process(orderConfirmationEmailRequest.getBodyTemplate(), context);
+
+        sendMail(orderConfirmationEmailRequest.getUserId(), orderConfirmationEmailRequest.getBodyTemplate(), orderConfirmationEmailRequest.getSubject(), body);
+    }
+
+    private void sendMail(UUID userId, String templateName, String subject, String body) {
         NotificationPreference userNotificationPreference = getByUserId(userId);
 
         Notification notification = Notification.builder()
                 .userId(userNotificationPreference.getUserId())
                 .subject(subject)
-                .body(body)
+                .body(templateName)
                 .createdOn(LocalDateTime.now())
                 .build();
 
@@ -92,6 +107,8 @@ public class NotificationService {
             notification.setStatus(NotificationStatus.FAILED);
             log.warn("Failed to send notification to user with id: %s due to %s".formatted(userId, e.getMessage()));
         }
+
+        notificationRepository.save(notification);
     }
 
     private NotificationPreference getByUserId(UUID userId) {

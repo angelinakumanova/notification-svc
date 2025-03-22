@@ -7,7 +7,7 @@ import lombok.Data;
 import java.util.UUID;
 
 @Data
-public class WelcomeEmailRequest {
+public class OrderConfirmationEmailRequest {
 
     @NotBlank
     private String subject;
@@ -19,5 +19,17 @@ public class WelcomeEmailRequest {
     private UUID userId;
 
     @NotBlank
-    private String userFirstName;
+    private String fullName;
+
+    @NotBlank
+    private String address;
+
+    @NotBlank
+    private String phoneNumber;
+
+    @NotBlank
+    private String courier;
+
+    @NotBlank
+    private String paymentMethod;
 }

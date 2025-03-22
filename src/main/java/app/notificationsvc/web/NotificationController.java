@@ -3,6 +3,7 @@ package app.notificationsvc.web;
 import app.notificationsvc.model.NotificationPreference;
 import app.notificationsvc.service.NotificationService;
 import app.notificationsvc.web.dto.NotificationPreferenceResponse;
+import app.notificationsvc.web.dto.OrderConfirmationEmailRequest;
 import app.notificationsvc.web.dto.UpsertNotificationPreference;
 import app.notificationsvc.web.dto.WelcomeEmailRequest;
 import app.notificationsvc.web.mapper.DtoMapper;
@@ -36,6 +37,13 @@ public class NotificationController {
     @PostMapping("/emails/welcome")
     public ResponseEntity<Void> sendWelcomeEmail(@RequestBody WelcomeEmailRequest welcomeEmailRequest) {
         notificationService.sendWelcomeEmail(welcomeEmailRequest);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(null);
+    }
+
+    @PostMapping("/emails/order/confirmation")
+    public ResponseEntity<Void> sendOrderConfirmationEmail(@RequestBody OrderConfirmationEmailRequest orderConfirmationEmailRequest) {
+        notificationService.sendOrderConfirmationEmail(orderConfirmationEmailRequest);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(null);
     }
