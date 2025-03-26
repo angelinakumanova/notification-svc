@@ -6,10 +6,7 @@ import app.notificationsvc.model.NotificationPreference;
 import app.notificationsvc.model.NotificationStatus;
 import app.notificationsvc.repository.NotificationPreferenceRepository;
 import app.notificationsvc.repository.NotificationRepository;
-import app.notificationsvc.web.dto.OrderCreateEmailRequest;
-import app.notificationsvc.web.dto.OrderShippedEmailRequest;
-import app.notificationsvc.web.dto.UpsertNotificationPreference;
-import app.notificationsvc.web.dto.WelcomeEmailRequest;
+import app.notificationsvc.web.dto.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -18,6 +15,7 @@ import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -101,6 +99,17 @@ public class NotificationService {
         String body = templateEngine.process(orderShippedEmailRequest.getEmailType().getTemplate(), context);
 
         sendMail(orderShippedEmailRequest.getUserId(), orderShippedEmailRequest.getEmailType(), orderShippedEmailRequest.getSubject(), body);
+    }
+
+    public void sendNewsletter() {
+        Context context = new Context();
+
+        String subject = "Your weekly update is here!!!\uD83D\uDC8C";
+        String body = templateEngine.process(EmailType.NEWSLETTER.getTemplate(), context);
+
+        List<NotificationPreference> allByIsNewsletterEnabledTrue  = preferenceRepository.findAllByIsNewsletterEnabledTrue();
+
+        allByIsNewsletterEnabledTrue.forEach(userPreference -> sendMail(userPreference.getUserId(), EmailType.NEWSLETTER, subject, body));
     }
 
     public NotificationPreference changeNotificationPreference(UUID userId, boolean enabled) {

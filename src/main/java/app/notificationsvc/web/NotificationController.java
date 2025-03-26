@@ -81,4 +81,11 @@ public class NotificationController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(null);
     }
+
+    @PostMapping("/emails/newsletter")
+    public ResponseEntity<Void> sendNewsletter() {
+        notificationService.sendNewsletter();
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(null);
+    }
 }
