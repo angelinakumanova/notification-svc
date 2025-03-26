@@ -26,7 +26,8 @@ public class Notification {
     private String subject;
 
     @Column(nullable = false)
-    private String body;
+    @Enumerated(EnumType.STRING)
+    private EmailType emailType;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

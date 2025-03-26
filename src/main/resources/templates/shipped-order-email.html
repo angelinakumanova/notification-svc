@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order confirmation</title>
+</head>
+<body style="background-color: #f7fafc; font-family: sans-serif; color: #4a5568;">
+
+<div style="max-width: 50rem; margin: 0 auto; background-color: #ffffff; border-radius: 0.5rem; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); padding: 1.5rem; margin-top: 2.5rem;">
+    <div style="text-align: center;">
+        <img src="https://res.cloudinary.com/dpj028iin/image/upload/v1742234866/unnamed_g8bzyv.png"  alt="Dripify Logo" style="margin-left: auto; margin-right: auto; height: 10rem;">
+        <h2 style="font-size: 2rem; font-weight: 700; color: #0f1114; margin-bottom: 0.5rem;" th:text="${'Order #' + orderId + ' has been shipped!'}"></h2>
+        <p style="font-size: 1.125rem; color: #0f1110;">Great news! Your order has been shipped and is on its way to you. 🚀
+        </p>
+    </div>
+
+    <div style="margin-top: 2rem;">
+        <p style="font-size: 1.2rem; color: #0f1114; font-weight: 700;">Order Details:</p>
+        <ul style="color: #0f1114; font-size: 1rem; list-style-type: none; margin-top: 1rem; ">
+            <li style="margin-bottom: 1rem;"><span style="font-weight: bold">Total Amount:</span> <span th:text="${totalAmount + ' BGN'}"></span></li>
+            <li style="margin-bottom: 1rem;"><span style="font-weight: bold">Payment Method:</span> <span th:text="${paymentMethod}"></span></li>
+            <li style="margin-bottom: 1rem;"><span style="font-weight: bold">Courier:</span> <span th:text="${courier}"></span></li>
+            <li style="margin-bottom: 1rem;"><span style="font-weight: bold">Address:</span> <span th:text="${address}"></span></li>
+        </ul>
+    </div>
+
+    <div style="margin-top: 2rem;">
+        <p style="font-size: 1.2rem; color: #0f1114; font-weight: 700;">Next Steps:
+        </p>
+        <ul style="color: #0f1114; font-size: 1rem; list-style-type: none; margin-top: 1rem; ">
+            <li style="margin-bottom: 1rem;">✔️ Please ensure the payment is completed as per the agreed terms.</li>
+            <li style="margin-bottom: 1rem;">✔️ Once you receive your order, make sure to mark it as received in your account.</li>
+            <li style="margin-bottom: 1rem;">✔️ You can also leave a review for the seller to share your experience and help others.</li>
+        </ul>
+    </div>
+
+    <p style="margin-top: 5rem; font-size: 1rem; color: #0f1110; font-weight: bold; text-align: center; text-transform: uppercase">You can view your order on the Orders page.</p>
+
+
+    <div style="margin-top: 2rem; text-align: center; color: #6b7280;">
+        <p style="font-size: 0.875rem;">If you have any questions, feel free to reach out to us at <a href="mailto:dripify.contact@gmail.com" style="color: #2d3748;">dripify.contact@gmail.com</a>.</p>
+        <p style="font-size: 0.875rem; margin-top: 0.5rem;">We’re here to help you every step of the way!</p>
+    </div>
+
+    <div style="margin-top: 3rem; text-align: center; color: #cbd5e0; font-size: 0.875rem;">
+        <p>&copy; 2025 Dripify. All rights reserved.</p>
+    </div>
+</div>
+
+</body>
+</html>

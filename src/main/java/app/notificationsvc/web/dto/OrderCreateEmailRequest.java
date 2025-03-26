@@ -1,5 +1,6 @@
 package app.notificationsvc.web.dto;
 
+import app.notificationsvc.model.EmailType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -7,13 +8,13 @@ import lombok.Data;
 import java.util.UUID;
 
 @Data
-public class OrderConfirmationEmailRequest {
+public class OrderCreateEmailRequest {
 
     @NotBlank
     private String subject;
 
-    @NotBlank
-    private String bodyTemplate;
+    @NotNull
+    private EmailType emailType;
 
     @NotNull
     private UUID userId;

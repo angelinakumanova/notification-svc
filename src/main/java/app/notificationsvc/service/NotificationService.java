@@ -1,11 +1,13 @@
 package app.notificationsvc.service;
 
+import app.notificationsvc.model.EmailType;
 import app.notificationsvc.model.Notification;
 import app.notificationsvc.model.NotificationPreference;
 import app.notificationsvc.model.NotificationStatus;
 import app.notificationsvc.repository.NotificationPreferenceRepository;
 import app.notificationsvc.repository.NotificationRepository;
-import app.notificationsvc.web.dto.OrderConfirmationEmailRequest;
+import app.notificationsvc.web.dto.OrderCreateEmailRequest;
+import app.notificationsvc.web.dto.OrderShippedEmailRequest;
 import app.notificationsvc.web.dto.UpsertNotificationPreference;
 import app.notificationsvc.web.dto.WelcomeEmailRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +35,10 @@ public class NotificationService {
         this.notificationRepository = notificationRepository;
         this.mailSender = mailSender;
         this.templateEngine = templateEngine;
+    }
+
+    public NotificationPreference getByUserId(UUID userId) {
+        return preferenceRepository.findByUserId(userId).orElseThrow(() -> new NullPointerException("Notification preference for user: " + userId + " not found"));
     }
 
     public NotificationPreference upsertPreference(UpsertNotificationPreference dto) {
@@ -66,31 +72,50 @@ public class NotificationService {
         Context context = new Context();
         context.setVariable("firstName", welcomeEmailRequest.getUserFirstName());
 
-        String body = templateEngine.process(welcomeEmailRequest.getBodyTemplate(), context);
+        String body = templateEngine.process(welcomeEmailRequest.getEmailType().getTemplate(), context);
 
-        sendMail(welcomeEmailRequest.getUserId(), welcomeEmailRequest.getBodyTemplate(), welcomeEmailRequest.getSubject(), body);
+        sendMail(welcomeEmailRequest.getUserId(), welcomeEmailRequest.getEmailType(), welcomeEmailRequest.getSubject(), body);
     }
 
-    public void sendOrderConfirmationEmail(OrderConfirmationEmailRequest orderConfirmationEmailRequest) {
+    public void sendNewOrderEmail(OrderCreateEmailRequest orderInfoEmailRequest) {
         Context context = new Context();
-        context.setVariable("fullName", orderConfirmationEmailRequest.getFullName());
-        context.setVariable("address", orderConfirmationEmailRequest.getAddress());
-        context.setVariable("phoneNumber", orderConfirmationEmailRequest.getPhoneNumber());
-        context.setVariable("courier", orderConfirmationEmailRequest.getCourier());
-        context.setVariable("paymentMethod", orderConfirmationEmailRequest.getPaymentMethod());
+        context.setVariable("fullName", orderInfoEmailRequest.getFullName());
+        context.setVariable("address", orderInfoEmailRequest.getAddress());
+        context.setVariable("phoneNumber", orderInfoEmailRequest.getPhoneNumber());
+        context.setVariable("courier", orderInfoEmailRequest.getCourier());
+        context.setVariable("paymentMethod", orderInfoEmailRequest.getPaymentMethod());
 
-        String body = templateEngine.process(orderConfirmationEmailRequest.getBodyTemplate(), context);
+        String body = templateEngine.process(orderInfoEmailRequest.getEmailType().getTemplate(), context);
 
-        sendMail(orderConfirmationEmailRequest.getUserId(), orderConfirmationEmailRequest.getBodyTemplate(), orderConfirmationEmailRequest.getSubject(), body);
+        sendMail(orderInfoEmailRequest.getUserId(), orderInfoEmailRequest.getEmailType(), orderInfoEmailRequest.getSubject(), body);
     }
 
-    private void sendMail(UUID userId, String templateName, String subject, String body) {
+    public void sendShippedOrderEmail(OrderShippedEmailRequest orderShippedEmailRequest) {
+        Context context = new Context();
+        context.setVariable("orderId", orderShippedEmailRequest.getOrderId());
+        context.setVariable("totalAmount", orderShippedEmailRequest.getTotalAmount());
+        context.setVariable("address", orderShippedEmailRequest.getAddress());
+        context.setVariable("courier", orderShippedEmailRequest.getCourier());
+        context.setVariable("paymentMethod", orderShippedEmailRequest.getPaymentMethod());
+
+        String body = templateEngine.process(orderShippedEmailRequest.getEmailType().getTemplate(), context);
+
+        sendMail(orderShippedEmailRequest.getUserId(), orderShippedEmailRequest.getEmailType(), orderShippedEmailRequest.getSubject(), body);
+    }
+
+    public NotificationPreference changeNotificationPreference(UUID userId, boolean enabled) {
+        NotificationPreference notificationPreference = getByUserId(userId);
+        notificationPreference.setNewsletterEnabled(enabled);
+        return preferenceRepository.save(notificationPreference);
+    }
+
+    private void sendMail(UUID userId, EmailType templateName, String subject, String body) {
         NotificationPreference userNotificationPreference = getByUserId(userId);
 
         Notification notification = Notification.builder()
                 .userId(userNotificationPreference.getUserId())
                 .subject(subject)
-                .body(templateName)
+                .emailType(templateName)
                 .createdOn(LocalDateTime.now())
                 .build();
 
@@ -111,8 +136,6 @@ public class NotificationService {
         notificationRepository.save(notification);
     }
 
-    private NotificationPreference getByUserId(UUID userId) {
-        return preferenceRepository.findByUserId(userId).orElseThrow(() -> new NullPointerException("Notification preference for user: " + userId + " not found"));
-    }
+
 
 }
