@@ -45,10 +45,10 @@ public class NotificationService {
 
         if (optionalNotificationPreference.isPresent()) {
             NotificationPreference notificationPreference = optionalNotificationPreference.get();
-            notificationPreference.toBuilder()
-                    .type(dto.getNotificationType())
-                    .isNewsletterEnabled(dto.isNewsletterEnabled())
-                    .contactData(dto.getContactData()).build();
+
+            notificationPreference.setType(dto.getNotificationType());
+            notificationPreference.setNewsletterEnabled(dto.isNewsletterEnabled());
+            notificationPreference.setContactData(dto.getContactData());
 
             return preferenceRepository.save(notificationPreference);
         } else {
@@ -67,6 +67,10 @@ public class NotificationService {
     }
 
     public void sendWelcomeEmail(WelcomeEmailRequest welcomeEmailRequest) {
+        if (!welcomeEmailRequest.getEmailType().equals(EmailType.WELCOME)) {
+            throw new IllegalArgumentException("Invalid email type for this email: " + welcomeEmailRequest.getEmailType());
+        }
+
         Context context = new Context();
         context.setVariable("firstName", welcomeEmailRequest.getUserFirstName());
 
@@ -75,20 +79,28 @@ public class NotificationService {
         sendMail(welcomeEmailRequest.getUserId(), welcomeEmailRequest.getEmailType(), welcomeEmailRequest.getSubject(), body);
     }
 
-    public void sendNewOrderEmail(OrderCreateEmailRequest orderInfoEmailRequest) {
+    public void sendNewOrderEmail(OrderCreateEmailRequest orderCreateEmailRequest) {
+        if (!orderCreateEmailRequest.getEmailType().equals(EmailType.NEW_ORDER)) {
+            throw new IllegalArgumentException("Invalid email type for this email: " + orderCreateEmailRequest.getEmailType());
+        }
+
         Context context = new Context();
-        context.setVariable("fullName", orderInfoEmailRequest.getFullName());
-        context.setVariable("address", orderInfoEmailRequest.getAddress());
-        context.setVariable("phoneNumber", orderInfoEmailRequest.getPhoneNumber());
-        context.setVariable("courier", orderInfoEmailRequest.getCourier());
-        context.setVariable("paymentMethod", orderInfoEmailRequest.getPaymentMethod());
+        context.setVariable("fullName", orderCreateEmailRequest.getFullName());
+        context.setVariable("address", orderCreateEmailRequest.getAddress());
+        context.setVariable("phoneNumber", orderCreateEmailRequest.getPhoneNumber());
+        context.setVariable("courier", orderCreateEmailRequest.getCourier());
+        context.setVariable("paymentMethod", orderCreateEmailRequest.getPaymentMethod());
 
-        String body = templateEngine.process(orderInfoEmailRequest.getEmailType().getTemplate(), context);
+        String body = templateEngine.process(orderCreateEmailRequest.getEmailType().getTemplate(), context);
 
-        sendMail(orderInfoEmailRequest.getUserId(), orderInfoEmailRequest.getEmailType(), orderInfoEmailRequest.getSubject(), body);
+        sendMail(orderCreateEmailRequest.getUserId(), orderCreateEmailRequest.getEmailType(), orderCreateEmailRequest.getSubject(), body);
     }
 
     public void sendShippedOrderEmail(OrderShippedEmailRequest orderShippedEmailRequest) {
+        if (!orderShippedEmailRequest.getEmailType().equals(EmailType.SHIPPED_ORDER)) {
+            throw new IllegalArgumentException("Invalid email type for this email: " + orderShippedEmailRequest.getEmailType());
+        }
+
         Context context = new Context();
         context.setVariable("orderId", orderShippedEmailRequest.getOrderId());
         context.setVariable("totalAmount", orderShippedEmailRequest.getTotalAmount());
